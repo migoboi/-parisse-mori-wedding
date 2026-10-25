@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Parisse & Mori | Private RSVP Connection Check</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100svh;padding:30px 18px;background:radial-gradient(ellipse at 50% 20%,#652736 0%,#430912 55%,#2e080f 100%);font:15px/1.6 Arial,sans-serif;color:#f5e9d9;display:grid;place-items:center}main{width:min(100%,520px);border:1px solid #b8968366;border-radius:20px;padding:clamp(22px,5vw,42px);background:#300915b9}h1{font:normal clamp(30px,7vw,44px)/1.1 Georgia,serif;margin:10px 0 16px}p{color:#ebd7c9}.eyebrow{font:600 10px/1.5 Arial,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#dbc4ad}label{display:block;font-size:13px;margin:22px 0 7px}input{width:100%;border:1px solid #bd9e9180;border-radius:9px;background:#fff9ee;color:#34101b;padding:15px;font:16px monospace;letter-spacing:.07em}button{margin-top:16px;width:100%;background:#f6e8d4;border:0;border-radius:999px;color:#34101b;font-weight:700;padding:15px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}#result{margin:22px 0 0;min-height:2em;white-space:pre-line;padding:14px;border:1px solid #c9b3a550;border-radius:12px;font-size:13px}small{display:block;margin-top:18px;color:#c9b8ab;font-size:11px}code{color:#f4e5d8}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">Temporary testing page</div>
+<h1>Parisse &amp; Mori</h1>
+<p>Check the live RSVP connection using the <strong>Invitation Code</strong> for our test household <strong>H039</strong>. This checks guest lookup only. Nothing will be saved or changed.</p>
+<form id="check" autocomplete="off">
+<label for="invite">H039 invitation code (32 characters)</label>
+<input id="invite" type="password" inputmode="text" maxlength="32" minlength="32" spellcheck="false" autocomplete="off" placeholder="Paste the code from Google Sheets" required>
+<button id="run" type="submit">Test connection (read-only)</button>
+</form>
+<div id="result" role="status" aria-live="polite">Not tested yet.</div>
+<small>Only run this on <code>https://parisseandmori.com</code>. Never upload invitation codes or API secrets to GitHub. Delete this temporary page once testing is finished.</small>
+</main>
+<script>
+'use strict';
+const form=document.getElementById('check'),input=document.getElementById('invite'),result=document.getElementById('result'),button=document.getElementById('run');
+form.addEventListener('submit',async(event)=>{
+ event.preventDefault();
+ const invite=input.value.trim();
+ if(!/^[a-f0-9]{32}$/i.test(invite)){result.textContent='Invalid format. Copy the 32-character code from the H039 row in the Households tab.';return;}
+ button.disabled=true;result.textContent='Checking the live connection…';
+ const ctrl=new AbortController();const timeout=setTimeout(()=>ctrl.abort(),20000);
+ try{
+  const response=await fetch('/api/rsvp',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'lookup',invite}),cache:'no-store',signal:ctrl.signal});
+  const data=await response.json();
+  if(response.ok && data.ok && data.invitation && data.invitation.householdId==='H039'){
+   const count=Array.isArray(data.invitation.guests)?data.invitation.guests.length:'available';
+   result.textContent='PASS ✓ Cloudflare → Apps Script → Google Sheets\nTest household H039 found. Guest records: '+count+'\nNo RSVP responses changed.';
+  }else{
+   result.textContent='NOT YET PASSING\nHTTP '+response.status+'\n'+(data.error||(!data.invitation?'No matching invitation found.':'Unexpected response.'))+'\nNo RSVP responses changed.';
+  }
+ }catch(e){result.textContent='Connection test failed: '+(e.name==='AbortError'?'Request timed out.':'Could not reach the RSVP API.')+'\nNo RSVP responses changed.';}
+ finally{clearTimeout(timeout);button.disabled=false;input.value='';}
+});
+</script>
+</body>
+</html>
