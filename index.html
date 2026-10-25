@@ -2864,7 +2864,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   <p class="calendar-copy">Our favorite day is better with you there. Save the details to your calendar.</p>
   <p class="calendar-date">SATURDAY, 6 MARCH 2027 · GUEST ARRIVAL 4:00 PM · CEREMONY 4:30 PM</p>
   <div class="calendar-actions" role="group" aria-label="Choose your calendar">
-    <a class="calendar-choice" id="rsvpAppleCalendar" href="#rsvpCalendar" role="button" aria-label="Apple Calendar — download one wedding event">
+    <a class="calendar-choice" id="rsvpAppleCalendar" href="#rsvpCalendar" download="parisse-mori-wedding-2027.ics" aria-label="Apple Calendar — save one wedding event">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
       <span>Apple Calendar</span>
     </a>
@@ -2875,7 +2875,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   </div>
   <details class="calendar-apple-help">
     <summary>How to add this event on iPhone</summary>
-    <p>Open the invitation in Safari, choose Apple Calendar, then open the downloaded wedding event from Downloads. If your iPhone only previews the file, you can share it to Mail, send it to yourself, and open the attachment in Apple Mail.</p>
+    <p>This saves one wedding event, not a subscription. On iPhone, open the invitation in Safari and tap Apple Calendar. If the event only downloads or previews, send the .ics file to yourself and open the attachment in Apple Mail to import it.</p>
     <button type="button" id="rsvpShareAppleCalendar" class="calendar-share-fallback" hidden>Share one event file</button>
   </details>
 </div>
@@ -2997,25 +2997,26 @@ window.addEventListener('DOMContentLoaded',()=>{
     return lines.map(line=>line.match(/.{1,70}/gu).join('\r\n ')).join('\r\n')+'\r\n';
   }
 
-  // Download one standard iCalendar event. Never use webcal:// here:
-  // webcal:// opens a read-only calendar SUBSCRIPTION, not a personal event.
-  // The event is generated inside this HTML; no separate .ics upload is needed.
+  // Apple Calendar: a real, one-event iCalendar file download, never a
+  // subscribed calendar. A direct user-tapped link works better in Safari
+  // than simulating a click on a second, temporary link.
+  const weddingIcsBlob=new Blob([calendarIcsText()],{type:'text/calendar;charset=utf-8'});
+  const weddingIcsUrl=URL.createObjectURL(weddingIcsBlob);
+  appleCalendar.href=weddingIcsUrl;
+  appleCalendar.download='parisse-mori-wedding-2027.ics';
+  appleCalendar.removeAttribute('role');
+  appleCalendar.setAttribute('aria-label','Apple Calendar — save one wedding event, not a subscription');
+  // Keep the object URL alive for repeat taps during this page session.
+
+  // Used only if an iPhone needs to open or share the event file another way.
   function downloadWeddingIcs(){
-    const blob=new Blob([calendarIcsText()],{type:'text/calendar;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
     const link=document.createElement('a');
-    link.href=url;
+    link.href=weddingIcsUrl;
     link.download='parisse-mori-wedding-2027.ics';
     document.body.appendChild(link);
     link.click();
     link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
-
-  appleCalendar.addEventListener('click',event=>{
-    event.preventDefault();
-    downloadWeddingIcs();
-  });
 
   // Optional native share-sheet fallback, useful for sending the single event
   // file to Mail when iOS only previews a downloaded .ics file.
