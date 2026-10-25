@@ -2492,6 +2492,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 .details .dress-editorial .dress-swatch img{display:none!important;}
 /* Mobile RSVP: name and buttons have their own rows; consistent breathing room. */
 .rsvp-box,.personal-household,#personalRsvp,#rsvpGuests{min-width:0;max-width:100%;}
+.rsvp .rsvp-one-line{white-space:nowrap;max-width:none!important;line-height:1.08!important;}
 #personalRsvp .personal-guest{box-sizing:border-box;}
 #personalRsvp .personal-choices{min-width:0;}
 #personalRsvp .personal-choices label{white-space:nowrap;text-align:center;}
@@ -2506,6 +2507,7 @@ window.addEventListener('DOMContentLoaded',()=>{
  #personalRsvp .personal-choices label{width:100%;min-height:46px;padding:10px 8px!important;letter-spacing:.04em;}
  #rsvpSaveButton.personal-demo-action{margin:23px auto 0;width:100%;max-width:none;min-height:48px;}
  #rsvpMessage{margin-top:15px!important;overflow-wrap:anywhere;}
+ .rsvp .rsvp-one-line{font-size:clamp(34px,8vw,54px)!important;white-space:nowrap;}
  .rsvp-calendar{margin-top:20px;padding:20px 14px;}
  .rsvp-calendar .calendar-actions button{width:100%;flex-basis:100%;max-width:none;}
  .details .dress-editorial .dress-swatch-row{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:min(100%,340px)!important;}
@@ -2726,17 +2728,17 @@ window.addEventListener('DOMContentLoaded',()=>{
 <section class="rsvp" id="rsvp">
 <div class="wrap">
 <p class="eyebrow">Kindly RSVP</p>
-<h2>Will you<br/>join us?</h2>
+<h2 class="rsvp-one-line">Will you join us?</h2>
 <p>Please reply by <strong>15 January 2027.</strong></p>
 <div class="rsvp-box">
 <div class="personal-household">
 <p class="personal-eyebrow">Your invitation</p>
 <h3>Your invitation</h3>
 <div class="intro-seats"><span class="seat-number">—</span> reserved seats</div>
-<p class="rsvp-guide">Please let us know who can celebrate with us.</p>
+<p class="rsvp-guide">Please let us know if you can celebrate with us.</p>
 <form autocomplete="off" id="personalRsvp">
   <div id="rsvpGuests" aria-live="polite"></div>
-  <button class="personal-demo-action" id="rsvpSaveButton" type="submit" disabled>Confirm our RSVP</button>
+  <button class="personal-demo-action" id="rsvpSaveButton" type="submit" disabled>Confirm RSVP</button>
   <p id="rsvpMessage" class="wedding-rsvp-message" role="status" aria-live="polite">Loading your personalized invitation…</p>
 </form>
 <div id="rsvpCalendar" class="rsvp-calendar" hidden aria-live="polite">
@@ -2749,7 +2751,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     <button id="rsvpAppleCalendar" type="button">Add to calendar</button>
 
   </div>
-  <p class="calendar-note" id="rsvpCalendarHelp">Tap Add to calendar to download the calendar file, then open it from Files or Downloads and save it to your calendar app. Each attending guest can save it on their own phone.</p>
+  
 </div>
 
 </div>
@@ -2937,7 +2939,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       guestsHolder.appendChild(fieldset);
     }
     saveButton.disabled=false;
-    saveButton.textContent=canSave?'Confirm our RSVP':'Preview confirmation (not saved)';
+    saveButton.textContent=canSave?'Confirm RSVP':'Preview confirmation (not saved)';
     const hasSavedResponse=data.guests.every(g=>g.rsvpStatus==='Attending'||g.rsvpStatus==='Declined');
     if(canSave&&hasSavedResponse){
       updateMessage('Your RSVP is on file. You may update your answers anytime.','success');
