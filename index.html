@@ -2090,7 +2090,13 @@ h2{
 .wedding-rsvp-message.is-success {color:#e8d5be!important;}
 #rsvpGuests .personal-guest label.is-selected {border-color:#f1dcbf; background:rgba(238,208,175,.13);}
 </style>
-<script>window.WEDDING_INVITE_CODE = new URLSearchParams(window.location.search).get("invite") || "";</script>
+<script>
+window.WEDDING_INVITE_CODE = new URLSearchParams(window.location.search).get("invite") || "";
+// Public browsing has no personalized greeting or reserved-seat count.
+if (/^https?:$/.test(location.protocol) && !/^[a-f0-9]{32}$/i.test(window.WEDDING_INVITE_CODE)) {
+  document.documentElement.classList.add('public-invitation');
+}
+</script>
 
 <style id="wedding-dress-code-v081">
 /* V0.81 — A Candlelit Affair; editorial, no illustrations. */
@@ -2377,6 +2383,28 @@ h2{
 }
 </style>
 
+
+<style id="wedding-public-invitation-v094">
+/* A generic visitor can browse the wedding details without seeing made-up seat counts. */
+.public-invitation #introMask .intro-seats,
+.public-invitation .personal-household .intro-seats,
+.public-invitation #introMask .intro-kids-line,
+.public-invitation #introMask .intro-reveal,
+.public-invitation #rsvpSaveButton,
+.public-invitation .personal-household .rsvp-guide {display:none!important;}
+.public-invitation #introMask .intro-guest-name {
+  font-size:clamp(27px,7vw,43px)!important;
+  line-height:1.16!important;
+  max-width:420px;
+  margin-inline:auto;
+  text-wrap:balance;
+}
+.public-invitation #introMask .intro-personal-kicker{letter-spacing:.21em!important;}
+.public-invitation #introMask .intro-sentence {margin-top:clamp(14px,2.4svh,24px)!important;}
+@media(max-height:710px){
+  .public-invitation #introMask .intro-guest-name{font-size:clamp(26px,6.2vw,38px)!important;}
+}
+</style>
 </head>
 <body id="top">
 
@@ -2611,10 +2639,10 @@ h2{
   <p class="calendar-date">SATURDAY, 6 MARCH 2027 · GUEST ARRIVAL 4:00 PM · CEREMONY 4:30 PM</p>
   <div class="calendar-actions">
     <a id="rsvpGoogleCalendar" href="#" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
-    <button id="rsvpAppleCalendar" type="button">Apple Calendar ↓</button>
+    <button id="rsvpAppleCalendar" type="button">iPhone / Apple Calendar ↓</button>
 
   </div>
-  <p class="calendar-note">Each attending guest may save the same event to their own calendar. You’ll confirm the event in your calendar app. Apple downloads an .ics file.</p>
+  <p class="calendar-note" id="rsvpCalendarHelp">To save on your phone: Google Calendar → review and tap Save. iPhone → download the .ics file, then open it from Downloads or Files and add it to Calendar if offered. Each attending guest can save it on their own phone.</p>
 </div>
 
 </div>
@@ -2824,7 +2852,13 @@ h2{
   function errorState(text){
     invitation=null;
     hideCalendar();
-    displayName('there');
+    if (document.documentElement.classList.contains('public-invitation')) {
+      greeting.textContent='These kids are getting married!';
+      document.querySelector('#introMask .intro-personal-kicker').textContent='PARISSE & MORI · 06 MARCH 2027';
+      rsvpHeading.textContent='Personal RSVP links';
+    } else {
+      displayName('there');
+    }
     seatNums.forEach(n=>n.textContent='—');
     guestsHolder.replaceChildren();
     saveButton.disabled=true;
@@ -2871,7 +2905,10 @@ h2{
       invitation.guests.forEach(guest=>{
         guest.rsvpStatus=responses.find(r=>r.guestId===guest.guestId).status;
       });
-      updateMessage('Thank you! Your RSVP has been saved. '+result.attending+' attending, '+result.declined+' unable to attend.','success');
+      const attendanceParts=[];
+      if(result.attending>0) attendanceParts.push(result.attending+' attending');
+      if(result.declined>0) attendanceParts.push(result.declined+' unable to attend');
+      updateMessage('Thank you! Your RSVP has been saved.'+(attendanceParts.length?' '+attendanceParts.join(', ')+'.':''),'success');
       showCalendar(invitation.guests,false);
     }catch(error){
       updateMessage('We could not save your RSVP: '+(error && error.message || 'Please try again.'),'error');
