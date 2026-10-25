@@ -1,0 +1,29 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Parisse and Mori//Wedding Invitation//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Parisse & Mori — Wedding Day
+X-WR-TIMEZONE:Asia/Manila
+BEGIN:VEVENT
+UID:parisse-mori-wedding-20270306@invitation.local
+DTSTAMP:20261025T000000Z
+DTSTART:20270306T080000Z
+DTEND:20270306T160000Z
+SUMMARY:Parisse & Mori — Wedding Day
+LOCATION:First United Building Dome\, Escolta\, Manila\, Philippines
+DESCRIPTION:Guest arrival: 4:00 PM (First United Building Dome\, Escolta).\
+ nCeremony: 4:30 PM.\nFirst United Google Maps: https://www.google.com/maps
+ /search/?api=1&query=First+United+Building+Dome%2C+Escolta%2C+Manila\nFirs
+ t United Waze: https://www.waze.com/ul?q=First%20United%20Building%20Dome%
+ 2C%20Escolta%2C%20Manila&navigate=yes\nTravel to reception: from 5:30 PM.\
+ nDinner: 7:00 PM\, Reducto de San Pedro\, Intramuros.\nAfter-party: from 8
+ :00 PM.\nFor reception directions\, navigate to Santa Lucia Parking Lot. R
+ educto de San Pedro is beside it.\nReception Google Maps: https://www.goog
+ le.com/maps/search/?api=1&query=Santa+Lucia+Parking+Lot%2C+Intramuros%2C+M
+ anila\nReception Waze: https://www.waze.com/ul?q=Santa%20Lucia%20Parking%2
+ 0Lot%2C%20Intramuros%2C%20Manila&navigate=yes
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR
