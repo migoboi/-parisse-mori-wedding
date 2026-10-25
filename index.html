@@ -2629,6 +2629,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 .rsvp-calendar .calendar-apple-help summary::-webkit-details-marker {display:none;}
 .rsvp-calendar .calendar-apple-help p {max-width:360px;margin:7px auto 0!important;color:#d9bea5!important;font:400 11px/1.6 Inter,Arial,sans-serif!important;}
 .rsvp-calendar .calendar-apple-help a {color:#fff0db;text-decoration:underline;text-underline-offset:3px;}
+.rsvp-calendar .calendar-share-fallback{display:inline-block;margin:9px auto 3px;padding:10px 14px;border:1px solid rgba(240,220,193,.48);border-radius:5px;background:transparent;color:#fff0db;font:500 10px/1.5 Montserrat,Arial,sans-serif;cursor:pointer;}
+.rsvp-calendar .calendar-share-fallback[hidden]{display:none!important;}
 </style>
 </head>
 <body id="top">
@@ -2862,7 +2864,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   <p class="calendar-copy">Our favorite day is better with you there. Save the details to your calendar.</p>
   <p class="calendar-date">SATURDAY, 6 MARCH 2027 · GUEST ARRIVAL 4:00 PM · CEREMONY 4:30 PM</p>
   <div class="calendar-actions" role="group" aria-label="Choose your calendar">
-    <a class="calendar-choice" id="rsvpAppleCalendar" href="parisse-mori-wedding-2027.ics" aria-label="Apple Calendar — subscribe to wedding date">
+    <a class="calendar-choice" id="rsvpAppleCalendar" href="#rsvpCalendar" role="button" aria-label="Apple Calendar — download one wedding event">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
       <span>Apple Calendar</span>
     </a>
@@ -2872,8 +2874,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     </a>
   </div>
   <details class="calendar-apple-help">
-    <summary>Apple Calendar not opening?</summary>
-    <p>Open this invitation in Safari, then select Apple Calendar again. You can also <a href="parisse-mori-wedding-2027.ics" download="parisse-mori-wedding-2027.ics">download the event file</a>.</p>
+    <summary>How to add this event on iPhone</summary>
+    <p>Open the invitation in Safari, choose Apple Calendar, then open the downloaded wedding event from Downloads. If your iPhone only previews the file, you can share it to Mail, send it to yourself, and open the attachment in Apple Mail.</p>
+    <button type="button" id="rsvpShareAppleCalendar" class="calendar-share-fallback" hidden>Share one event file</button>
   </details>
 </div>
 
@@ -2994,10 +2997,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     return lines.map(line=>line.match(/.{1,70}/gu).join('\r\n ')).join('\r\n')+'\r\n';
   }
 
-  // On a hosted page, Apple Calendar can subscribe to a real .ics URL.
-  // This avoids Blob downloads, which many iOS in-app browsers do not handle.
-  // Upload the companion .ics file beside index.html when deploying.
-  // A file:// preview has no hosted URL, so keep a downloadable event fallback.
+  // Download one standard iCalendar event. Never use webcal:// here:
+  // webcal:// opens a read-only calendar SUBSCRIPTION, not a personal event.
+  // The event is generated inside this HTML; no separate .ics upload is needed.
   function downloadWeddingIcs(){
     const blob=new Blob([calendarIcsText()],{type:'text/calendar;charset=utf-8'});
     const url=URL.createObjectURL(blob);
@@ -3010,16 +3012,28 @@ window.addEventListener('DOMContentLoaded',()=>{
     setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
 
-  if(/^https?:$/.test(window.location.protocol)){
-    const fileUrl=new URL('parisse-mori-wedding-2027.ics',window.location.href);
-    appleCalendar.href=fileUrl.href.replace(/^https?:/i,'webcal:');
-  }else{
-    // Direct preview mode: the URL above only exists once hosted.
-    appleCalendar.href='#rsvpCalendar';
-    appleCalendar.addEventListener('click',event=>{
-      event.preventDefault();
-      downloadWeddingIcs();
-    });
+  appleCalendar.addEventListener('click',event=>{
+    event.preventDefault();
+    downloadWeddingIcs();
+  });
+
+  // Optional native share-sheet fallback, useful for sending the single event
+  // file to Mail when iOS only previews a downloaded .ics file.
+  const shareAppleCalendar=document.getElementById('rsvpShareAppleCalendar');
+  if(shareAppleCalendar && typeof File !== 'undefined' && navigator.share && navigator.canShare){
+    const makeEventFile=()=>new File([calendarIcsText()], 'parisse-mori-wedding-2027.ics', {type:'text/calendar'});
+    try{
+      if(navigator.canShare({files:[makeEventFile()]})){
+        shareAppleCalendar.hidden=false;
+        shareAppleCalendar.addEventListener('click',async()=>{
+          try{
+            await navigator.share({files:[makeEventFile()],title:weddingTitle});
+          }catch(err){
+            if(err && err.name !== 'AbortError') downloadWeddingIcs();
+          }
+        });
+      }
+    }catch(err){ /* File sharing isn't supported by this browser; download still works. */ }
   }
 
   function googleCalendarEventUrl(){
