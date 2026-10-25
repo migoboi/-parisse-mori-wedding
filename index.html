@@ -2568,6 +2568,26 @@ window.addEventListener('DOMContentLoaded',()=>{
   .details .dress-editorial .actual-brush-swatches .dress-swatch-name{font-size:clamp(6.6px,2vw,8px)!important;letter-spacing:.035em!important;}
 }
 </style>
+
+<style id="android-calendar-support">
+/* Android guests should see one clear primary action; optional ICS fallback is unobtrusive. */
+.rsvp-calendar .calendar-actions .calendar-alternate{
+  flex:1 1 100%!important;
+  max-width:none!important;
+  min-height:36px!important;
+  background:transparent!important;
+  border:0!important;
+  padding:8px 5px 2px!important;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  font:500 10px/1.4 Montserrat,Arial,sans-serif!important;
+  color:#e8cdb8!important;
+}
+.rsvp-calendar .calendar-actions .calendar-alternate:focus-visible{
+  outline:2px solid #fff3df;
+  outline-offset:2px;
+}
+</style>
 </head>
 <body id="top">
 
@@ -2922,18 +2942,51 @@ window.addEventListener('DOMContentLoaded',()=>{
     return lines.map(line=>line.match(/.{1,70}/gu).join('\r\n ')).join('\r\n')+'\r\n';
   }
 
-  appleCalendar.addEventListener('click',()=>{
+  // Android's standard "open .ics" flow often shows document apps instead of a
+  // calendar. Offer a prefilled event editor there; keep .ics for Apple/desktop.
+  // The single main button stays "Add to calendar" on every device.
+  function downloadWeddingIcs(){
     const blob=new Blob([calendarIcsText()],{type:'text/calendar;charset=utf-8'});
     const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='parisse-mori-wedding-2027.ics';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    // Revoke on a later interaction, not immediately, for mobile Safari.
-    appleCalendar.addEventListener('click',()=>URL.revokeObjectURL(url),{once:true});
-  });
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='parisse-mori-wedding-2027.ics';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // Allow the file download to finish on mobile browsers.
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+
+  function googleCalendarEventUrl(){
+    const query=new URLSearchParams({
+      action:'TEMPLATE',
+      text:weddingTitle,
+      dates:'20270306T080000Z/20270306T160000Z',
+      ctz:'Asia/Manila',
+      location:weddingLocation,
+      details:weddingDescription
+    });
+    return 'https://calendar.google.com/calendar/render?'+query.toString();
+  }
+
+  if(/Android/i.test(navigator.userAgent)){
+    appleCalendar.addEventListener('click',()=>{
+      // User-triggered navigation, so it works in a normal Android browser.
+      window.location.assign(googleCalendarEventUrl());
+    });
+
+    // Optional fallback for Android guests who save to Outlook or another app.
+    const alternative=document.createElement('button');
+    alternative.type='button';
+    alternative.className='calendar-alternate';
+    alternative.textContent='Use Outlook / another calendar';
+    alternative.setAttribute('aria-label','Download event file for Outlook or another calendar');
+    alternative.addEventListener('click',downloadWeddingIcs);
+    calendarCard.querySelector('.calendar-actions').appendChild(alternative);
+  }else{
+    appleCalendar.addEventListener('click',downloadWeddingIcs);
+  }
 
   function hideCalendar(){ calendarCard.hidden=true; }
   function showCalendar(guests,preview){
