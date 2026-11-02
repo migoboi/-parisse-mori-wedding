@@ -2118,6 +2118,37 @@ if (/^https?:$/.test(location.protocol) && !/^[a-f0-9]{32}$/i.test(window.WEDDIN
 }
 </script>
 <script>
+// Start the personalized RSVP lookup while the remainder of the HTML is still streaming.
+// Only minimal name/seat metadata is cached for display, never attendance status.
+(function(){
+  const token=String(window.WEDDING_INVITE_CODE||'').trim();
+  if (!/^https?:$/.test(location.protocol) || !/^[a-f0-9]{32}$/i.test(token)) return;
+  const cacheKey='parisse-mori-invite-preview:'+token;
+  window.WEDDING_INVITE_CACHE_KEY=cacheKey;
+  try {
+    const preview=JSON.parse(localStorage.getItem(cacheKey)||'null');
+    if(preview && Date.now()-preview.savedAt < 14*24*60*60*1000 &&
+       typeof preview.invitationName==='string' &&
+       Number.isInteger(preview.seatsReserved) && preview.seatsReserved > 0){
+      window.WEDDING_INVITE_PREVIEW=preview;
+    }
+  } catch(_) { /* Private browsing or storage disabled: fetch normally. */ }
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),20000);
+  window.WEDDING_INVITE_LOOKUP=fetch('/api/rsvp',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'lookup',invite:token}),
+    cache:'no-store', credentials:'same-origin', signal:controller.signal
+  }).then(async response=>{
+    const data=await response.json().catch(()=>{throw new Error('Unexpected reply from RSVP service.');});
+    if(!response.ok || !data || !data.ok)
+      throw new Error(data && data.error || 'RSVP service is temporarily unavailable.');
+    return {data};
+  }).catch(error=>({error})).finally(()=>clearTimeout(timeout));
+})();
+</script>
+<script>
 window.addEventListener('DOMContentLoaded',()=>{
   if(!document.documentElement.classList.contains('public-invitation')) return;
   const greeting=document.querySelector('#introMask .intro-guest-name');
@@ -3245,14 +3276,30 @@ window.addEventListener('DOMContentLoaded',()=>{
     greeting.classList.toggle('long-invite-name',greetingText.length>27);
     rsvpHeading.textContent=invitationName||'Your invitation';
   }
+  function updateInvitationPreview(name,numberOfSeats){
+    // The preview is for display only. The live lookup still controls RSVP access.
+    displayName(name);
+    const seatCount=Number(numberOfSeats)||0;
+    if(seatCount>0){
+      seatNums.forEach(n=>n.textContent=String(seatCount));
+      document.querySelectorAll('#introMask .seat-copy').forEach(el=>el.textContent=seatCount===1?'SEAT RESERVED FOR YOU':'SEATS RESERVED FOR YOU');
+      document.querySelectorAll('.personal-household .seat-copy').forEach(el=>el.textContent=seatCount===1?'SEAT RESERVED':'SEATS RESERVED');
+    }
+    document.documentElement.classList.remove('invitation-is-loading');
+  }
   function displayInvitation(data,canSave){
     invitation=data;
     hideCalendar();
-    displayName(data.invitationName);
-    const seatCount=Number(data.seatsReserved)||0;
-    seatNums.forEach(n=>n.textContent=String(data.seatsReserved));
-    document.querySelectorAll('#introMask .seat-copy').forEach(el=>el.textContent=seatCount===1?'SEAT RESERVED FOR YOU':'SEATS RESERVED FOR YOU');
-    document.querySelectorAll('.personal-household .seat-copy').forEach(el=>el.textContent=seatCount===1?'SEAT RESERVED':'SEATS RESERVED');
+    updateInvitationPreview(data.invitationName,data.seatsReserved);
+    if(canSave && window.WEDDING_INVITE_CACHE_KEY){
+      try {
+        localStorage.setItem(window.WEDDING_INVITE_CACHE_KEY,JSON.stringify({
+          invitationName:String(data.invitationName||''),
+          seatsReserved:Number(data.seatsReserved),
+          savedAt:Date.now()
+        }));
+      } catch(_) { /* Works without local storage too. */ }
+    }
     document.querySelector('.personal-household').classList.toggle('is-single-guest',data.guests.length===1);
     guestsHolder.replaceChildren();
     for(const guest of data.guests){
@@ -3297,6 +3344,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   function errorState(text){
     invitation=null;
+    document.documentElement.classList.remove('invitation-is-loading');
     hideCalendar();
     if (document.documentElement.classList.contains('public-invitation')) {
       greeting.textContent='';
@@ -3306,6 +3354,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       displayName('there');
     }
     seatNums.forEach(n=>n.textContent='—');
+    document.querySelectorAll('#introMask .seat-copy').forEach(el=>el.textContent='INVITATION NOT LOADED');
     guestsHolder.replaceChildren();
     saveButton.disabled=true;
     updateMessage(text,'error');
@@ -3376,7 +3425,24 @@ window.addEventListener('DOMContentLoaded',()=>{
       ? 'This invitation link appears to be invalid. Please use your personal link when you receive it.'
       : 'Personal RSVP links will be shared with invited guests. You can still explore our wedding details above.');
   }else{
-    weddingApi('lookup').then(apiReply=>{
+    // Repeat visitors see only their cached name and seat count immediately.
+    // The RSVP form remains locked until the server validates the current invitation.
+    const preview=window.WEDDING_INVITE_PREVIEW;
+    if(preview){
+      updateInvitationPreview(preview.invitationName,preview.seatsReserved);
+    }else{
+      greeting.textContent='LOADING…';
+      seatNums.forEach(n=>n.textContent='…');
+      document.querySelectorAll('#introMask .seat-copy').forEach(el=>el.textContent='CHECKING YOUR INVITATION');
+      document.documentElement.classList.add('invitation-is-loading');
+    }
+    const lookup=window.WEDDING_INVITE_LOOKUP
+      ? window.WEDDING_INVITE_LOOKUP.then(result=>{
+          if(result.error) throw result.error;
+          return result.data;
+        })
+      : weddingApi('lookup');
+    lookup.then(apiReply=>{
       if(!apiReply.invitation){
         errorState('We could not find this invitation. Please check your link with Parisse or Mori.');
         return;
