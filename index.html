@@ -2,6 +2,7 @@
 
 <html lang="en">
 <head>
+<meta name="wedding-memory-form" content="2026-11-03-no-name-no-checkbox" />
 <!-- Messenger / Facebook social link preview; upload wedding-preview.jpg alongside index.html. -->
 <meta property="og:type" content="website" />
 <!-- Deliberately omit og:url: do not canonicalize personalized Messenger shares to the generic homepage. -->
@@ -2722,8 +2723,6 @@ window.addEventListener('DOMContentLoaded',()=>{
 .memory-form {max-width:590px;margin:20px auto 0;text-align:left;padding:22px;border:1px solid rgba(83,103,82,.56);background:rgba(38,60,46,.20);border-radius:8px;}
 .memory-form[hidden],.memory-subpanel[hidden]{display:none!important;}
 .memory-form .memory-label {display:block;margin:0 0 9px;color:#e9d8c5;text-transform:uppercase;letter-spacing:.1em;font:600 10px/1.5 Montserrat,Arial,sans-serif;}
-.memory-form .memory-name {display:block;width:100%;border:1px solid rgba(201,173,146,.5);background:rgba(20,20,20,.18);border-radius:4px;color:var(--cream);padding:13px 11px;font-size:14px;outline-offset:3px;}
-.memory-name::placeholder{color:#ae9783;}
 .memory-subpanel {padding:17px 0;border-bottom:1px solid rgba(201,173,146,.18);}
 .memory-subpanel input[type="file"] {display:block;width:100%;font-size:12px;color:#ddc7b1;max-width:100%;}
 .memory-subpanel input[type="file"]::file-selector-button {color:#42281b;background:#e7d2b8;border:0;border-radius:3px;padding:9px 10px;margin-right:10px;cursor:pointer;font:500 10px Montserrat,Arial,sans-serif;}
@@ -2733,8 +2732,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 .memory-recorder-actions {display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 9px;}
 .memory-minor-button {background:transparent;color:#f3e8d7;border:1px solid rgba(201,173,146,.6);border-radius:4px;padding:10px 12px;cursor:pointer;font:500 10px Montserrat,Arial,sans-serif;}
 .memory-minor-button:disabled {opacity:.45;cursor:not-allowed;}
-.memory-consent {display:flex;align-items:start;gap:10px;margin:20px 0 16px;color:#d4c3b1;font:12px/1.65 Montserrat,Arial,sans-serif;}
-.memory-consent input {accent-color:#e7d2b8;width:17px;height:17px;flex:0 0 auto;margin-top:2px;}
+.memory-upload-permission {margin:18px 0 12px;line-height:1.75;color:#cebca9;}
 .memory-submit {width:100%;background:#e7d2b8;color:#430912;border:0;border-radius:3px;cursor:pointer;padding:14px 16px;font:600 11px Montserrat,Arial,sans-serif;letter-spacing:.07em;}
 .memory-submit:disabled {opacity:.45;cursor:not-allowed;}
 .memory-optional {font:italic 15px/1.5 "The Seasons","Cormorant Garamond",Georgia,serif;color:#bda794;margin:17px auto 0;}
@@ -3047,8 +3045,6 @@ window.addEventListener('DOMContentLoaded',()=>{
       </button>
     </div>
     <form id="memoryForm" class="memory-form" novalidate hidden>
-      <label class="memory-label" for="memoryGuestName">Your name</label>
-      <input class="memory-name" id="memoryGuestName" name="guestName" autocomplete="name" maxlength="120" placeholder="So we know who it's from" required />
       <div class="memory-subpanel" id="memoryPhotosPanel" hidden>
         <label class="memory-label" for="memoryPhotos">Photos or videos</label>
         <input type="file" id="memoryPhotos" name="memoryPhotos" accept="image/*,video/*" multiple />
@@ -3066,7 +3062,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         <input type="file" id="memoryAudio" name="memoryAudio" accept="audio/*" multiple />
         <ul id="memoryAudioList" class="memory-file-list" aria-live="polite"></ul>
       </div>
-      <label class="memory-consent"><input type="checkbox" id="memoryConsent" required /> <span>I'm happy for my memories to be considered for sharing at the wedding.</span></label>
+      <p class="memory-help memory-upload-permission">By sending a memory, you agree we may consider sharing it at our wedding.</p>
       <button class="memory-submit" id="memorySubmit" type="submit" disabled>Send My Memories</button>
       <p id="memoryStatus" class="memory-help" role="status" aria-live="polite">Submissions will open once the private upload connection is ready.</p>
     </form>
@@ -3638,8 +3634,6 @@ const dog=document.querySelector('.topdog');
   const voicePanel = document.getElementById('memoryVoicePanel');
   const photoInput = document.getElementById('memoryPhotos');
   const audioInput = document.getElementById('memoryAudio');
-  const nameInput = document.getElementById('memoryGuestName');
-  const consent = document.getElementById('memoryConsent');
   const submit = document.getElementById('memorySubmit');
   const status = document.getElementById('memoryStatus');
   const photoList = document.getElementById('memoryPhotoList');
@@ -3667,10 +3661,13 @@ const dog=document.querySelector('.topdog');
     renderFileNames(photoInput.files||[],photoList);
     renderFileNames([...Array.from(audioInput.files||[]),...recordedFiles],audioList);
     const hasFiles = filesToSend().length>0;
-    submit.disabled = sending || !endpoint || !hasFiles || !nameInput.value.trim() || !consent.checked;
+    // Selection controls the button; lack of test mode shows an actionable message on submit.
+    submit.disabled = sending || !hasFiles;
     recordClear.hidden=recordedFiles.length===0;
-    if(!endpoint) status.textContent='Submissions will open once the private upload connection is ready.';
+    if(!sending && !validInvite) status.textContent='Open your personalized invitation link to share a memory.';
+    else if(!sending && !endpoint) status.textContent='Upload testing is not enabled for this link. Add &memoryTest=1 to the personalized invitation URL.';
     else if(!sending && !hasFiles) status.textContent='Choose a photo, video or recording to begin.';
+    else if(!sending) status.textContent='Ready to send.';
   }
   function toggle(panel,button){
     const show=panel.hidden;
@@ -3678,12 +3675,10 @@ const dog=document.querySelector('.topdog');
     button.setAttribute('aria-expanded',String(show));
     form.hidden=photoPanel.hidden&&voicePanel.hidden;
     refresh();
-    if(show && !nameInput.value.trim()) nameInput.focus({preventScroll:true});
   }
   photoToggle.addEventListener('click',()=>toggle(photoPanel,photoToggle));
   voiceToggle.addEventListener('click',()=>toggle(voicePanel,voiceToggle));
-  [photoInput,audioInput,nameInput,consent].forEach(el=>el.addEventListener('change',refresh));
-  nameInput.addEventListener('input',refresh);
+  [photoInput,audioInput].forEach(el=>el.addEventListener('change',refresh));
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
     recordStart.hidden=true;
     recordStatus.textContent='You can upload a recording from your phone instead.';
@@ -3715,28 +3710,37 @@ const dog=document.querySelector('.topdog');
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     const files=filesToSend();
-    if(!endpoint){status.textContent='The private upload connection is not ready yet.';return;}
-    if(sending||!files.length||!nameInput.value.trim()||!consent.checked)return;
+    if(!endpoint){status.textContent=validInvite
+      ? 'To test uploads, add &memoryTest=1 to the end of your personalized invitation URL (before any #section).'
+      : 'Open the personalized invitation link you received to upload a memory.';return;}
+    if(sending||!files.length)return;
     sending=true;submit.disabled=true;
     let completed=0;
+    let errorMessage='';
     try{
       for(const file of files){
         status.textContent=`Uploading ${completed+1} of ${files.length}…`;
         const fd=new FormData();
-        fd.append('name',nameInput.value.trim());
         fd.append('invitation',String(window.WEDDING_INVITE_CODE||''));
         fd.append('file',file,file.name);
-        fd.append('consent','yes');
-        const response=await fetch(endpoint,{method:'POST',body:fd});
-        if(!response.ok) throw new Error('Upload failed. Please try again.');
+        const response=await fetch(endpoint,{method:'POST',body:fd,cache:'no-store'});
+        const result=await response.json().catch(()=>null);
+        if(!response.ok || !result || result.ok !== true) {
+          throw new Error(result && typeof result.error==='string' ? result.error : 'Upload failed. Please try again.');
+        }
         completed++;
       }
       status.textContent='Thank you! Your memories have been received. 🤍';
-      photoInput.value='';audioInput.value='';recordedFiles.length=0;consent.checked=false;
+      photoInput.value='';audioInput.value='';recordedFiles.length=0;
     }catch(err){
-      status.textContent=`${completed} of ${files.length} files saved. ${err.message||'Please try again.'}`;
+      errorMessage=`${completed} of ${files.length} files saved. ${err.message||'Please try again.'}`;
       // Leave choices intact for review. Do not claim an unsaved file was uploaded.
-    }finally{sending=false;refresh();if(completed===files.length)status.textContent='Thank you! Your memories have been received. 🤍';}
+    }finally{
+      sending=false;
+      refresh();
+      if(completed===files.length) status.textContent='Thank you! Your memories have been received. 🤍';
+      else if(errorMessage) status.textContent=errorMessage;
+    }
   });
   refresh();
   // Reveal phone only on the wedding day (Philippine time) if configured by the couple.
