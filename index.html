@@ -842,6 +842,11 @@ h2{
 .details .card span{
   color:#715F57;
   line-height:1.55;
+  text-align:justify;
+  text-justify:inter-word;
+}
+.details .card.gifts-card span{
+  text-align:justify;
 }
 .details .venue-card{
   overflow:visible;
@@ -2373,9 +2378,9 @@ window.addEventListener('DOMContentLoaded',()=>{
 .rsvp-calendar[hidden]{display:none!important;}
 .rsvp-calendar{margin-top:22px;padding:23px 18px 21px;border:1px solid rgba(226,195,159,.56);border-radius:15px;background:linear-gradient(155deg,rgba(66,27,36,.75),rgba(38,60,46,.38));text-align:center;}
 .rsvp-calendar .calendar-eyebrow{margin:0 0 10px!important;font:500 9px/1.5 Montserrat,Arial,sans-serif!important;letter-spacing:.22em;text-transform:uppercase;color:#ebc9a3!important;}
-.rsvp-calendar h4{font:400 clamp(27px,7vw,35px)/1.13 "Cormorant Garamond",Georgia,serif;margin:0 0 10px;color:#fff1df;}
-.rsvp-calendar .calendar-names{margin:0 auto 11px!important;font:400 16px/1.5 "Cormorant Garamond",Georgia,serif!important;color:#f2dbca!important;}
-.rsvp-calendar .calendar-missed{margin:0 auto 12px!important;max-width:370px;color:#e6c7b4!important;font:400 12px/1.6 Inter,Arial,sans-serif!important;}
+.rsvp-calendar h4{font:400 clamp(27px,7vw,35px)/1.13 "Cormorant Garamond",Georgia,serif;margin:0 0 14px;color:#fff1df;}
+.rsvp-calendar .calendar-names{display:none!important;}
+.rsvp-calendar .calendar-missed{margin:0 auto 14px!important;max-width:370px;color:#f2dbca!important;font:400 16px/1.5 "Cormorant Garamond",Georgia,serif!important;}
 .rsvp-calendar .calendar-missed[hidden]{display:none!important;}
 .rsvp-calendar .calendar-copy{margin:0 auto 15px!important;max-width:360px;color:#e7d3c0!important;font-size:12px!important;line-height:1.7!important;}
 .rsvp-calendar .calendar-date{margin:0 auto 18px!important;color:#f0dec9!important;font:500 10px/1.65 Montserrat,Arial,sans-serif!important;letter-spacing:.025em;}
@@ -3013,7 +3018,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 </div>
 </div>
 <div class="card"><small>Guests</small><strong>Our Closest Circle</strong><span>As much as we’d love to celebrate with everyone, our ceremony will take place in a small, intimate space, so we’re keeping our celebration limited to the guests named on each invitation.</span></div>
-<div class="card"><small>Gifts</small><strong>Your Presence Is Enough</strong><span>Your presence is more than enough! But if you insist, a little something toward the future we’re building or a gift of experience we can enjoy together would mean so much to us. 🤍</span></div>
+<div class="card gifts-card"><small>Gifts</small><strong>Your Presence Is Enough</strong><span>Your presence is more than enough! But if you insist, a little something toward the future we’re building or a gift of experience we can enjoy together would mean so much to us.</span></div>
 </div>
 </div>
 </section>
@@ -3035,7 +3040,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     <p class="memory-tease">What happens to these memories? Well, you'll just have to wait and see.</p>
     <div class="memory-choices" aria-label="Choose how to share a memory">
       <button type="button" class="memory-choice" id="memoryChoosePhotos" aria-expanded="false" aria-controls="memoryPhotosPanel">
-        <span class="memory-choice-icon" aria-hidden="true">✳</span><span>Share a Photo or Video</span>
+        <span class="memory-choice-icon" aria-hidden="true">📷</span><span>Share a Photo or Video</span>
       </button>
       <button type="button" class="memory-choice" id="memoryChooseVoice" aria-expanded="false" aria-controls="memoryVoicePanel">
         <span class="memory-choice-icon" aria-hidden="true">♫</span><span>Leave a Voice Message</span>
@@ -3080,7 +3085,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 <form autocomplete="off" id="personalRsvp">
   <div id="rsvpGuests" aria-live="polite"></div>
-  <button class="personal-demo-action" id="rsvpSaveButton" type="submit" disabled>Confirm OUR RSVP</button>
+  <button class="personal-demo-action" id="rsvpSaveButton" type="submit" disabled>Confirm RSVP</button>
   <p id="rsvpMessage" class="wedding-rsvp-message" role="status" aria-live="polite">Loading your personalized invitation…</p>
 </form>
 <div id="rsvpCalendar" class="rsvp-calendar" hidden aria-live="polite">
@@ -3142,6 +3147,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const message=document.getElementById('rsvpMessage');
   const calendarCard=document.getElementById('rsvpCalendar');
   const calendarEyebrow=document.getElementById('rsvpCalendarEyebrow');
+  const calendarHeading=document.getElementById('rsvpCalendarHeading');
   const calendarNames=document.getElementById('rsvpCalendarNames');
   const calendarMissed=document.getElementById('rsvpCalendarMissed');
   const calendarCopy=document.getElementById('rsvpCalendarCopy');
@@ -3264,15 +3270,17 @@ window.addEventListener('DOMContentLoaded',()=>{
       ? missedNames.join(' and ')
       : missedNames.slice(0,-1).join(', ')+', and '+missedNames[missedNames.length-1];
     calendarEyebrow.textContent=preview?'Calendar feature preview — no RSVP saved':'Your RSVP is confirmed';
-    calendarNames.textContent=names.join(' & ');
+    const attendingLabel=names.length<3
+      ? names.join(' & ')
+      : names.slice(0,-1).join(', ')+', and '+names[names.length-1];
+    calendarHeading.textContent='See you there, '+attendingLabel+'!';
+    calendarNames.textContent='';
     // In a partially attending household, acknowledge the guests who cannot come, too.
     calendarMissed.hidden=!declined.length;
     calendarMissed.textContent=declined.length
       ? 'Sorry you can’t make it, '+readableNames+'. We’ll miss you!'
       : '';
-    calendarCopy.innerHTML=declined.length
-      ? 'Save the details to your calendar.'
-      : 'Can’t wait to celebrate with you!<br/>Save the details to your calendar.';
+    calendarCopy.innerHTML='Save the details to your calendar.';
     calendarCard.hidden=false;
   }
 
@@ -3347,7 +3355,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       guestsHolder.appendChild(fieldset);
     }
     saveButton.disabled=false;
-    saveButton.textContent=canSave?'Confirm OUR RSVP':'Preview confirmation (not saved)';
+    saveButton.textContent=canSave?'Confirm RSVP':'Preview confirmation (not saved)';
     const hasSavedResponse=data.guests.every(g=>g.rsvpStatus==='Attending'||g.rsvpStatus==='Declined');
     if(canSave&&hasSavedResponse){
       updateMessage('Plans changed? You can always come back and update your RSVP.','success');
