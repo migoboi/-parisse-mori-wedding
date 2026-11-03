@@ -3625,10 +3625,12 @@ const dog=document.querySelector('.topdog');
 <script id="wedding-memory-feature">
 (function(){
   'use strict';
-  // Private upload endpoint needs to be connected to your Google Drive backend.
-  // Example, when deployed: window.WEDDING_MEMORY_UPLOAD_ENDPOINT = '/api/memories';
-  // Do not embed Google Drive access tokens or other secrets in website HTML.
-  const endpoint = (window.WEDDING_MEMORY_UPLOAD_ENDPOINT || '').trim();
+  // Private upload testing is available only when the URL includes
+  // ?invite=<personalized-code>&memoryTest=1. Normal visitors see no upload.
+  // All credentials remain in Cloudflare; never embed secrets in this HTML.
+  const urlParams = new URLSearchParams(window.location.search);
+  const validInvite = /^[a-f0-9]{32}$/i.test(String(window.WEDDING_INVITE_CODE || ''));
+  const endpoint = validInvite && urlParams.get('memoryTest') === '1' ? '/api/memory' : '';
   const form = document.getElementById('memoryForm');
   const photoToggle = document.getElementById('memoryChoosePhotos');
   const voiceToggle = document.getElementById('memoryChooseVoice');
