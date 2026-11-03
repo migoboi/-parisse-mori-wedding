@@ -2156,7 +2156,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const kicker=document.querySelector('#introMask .intro-personal-kicker');
   const rsvpTitle=document.querySelector('.personal-household h3');
   if(greeting) greeting.textContent='';
-  if(sentence) sentence.textContent='Take a look around. Personal RSVP opens from the invite link we sent you.';
+  // Keep the same playful opening as personalized invitations, without public RSVP instructions.
   if(kicker) kicker.firstChild.nodeValue='PARISSE & MORI · MARCH 06 2027';
   if(rsvpTitle) rsvpTitle.textContent='Personal RSVP links';
 });
@@ -2456,8 +2456,6 @@ window.addEventListener('DOMContentLoaded',()=>{
 /* A generic visitor can browse the wedding details without seeing made-up seat counts. */
 .public-invitation #introMask .intro-seats,
 .public-invitation .personal-household .intro-seats,
-.public-invitation #introMask .intro-kids-line,
-.public-invitation #introMask .intro-reveal,
 .public-invitation #rsvpSaveButton,
 .public-invitation .personal-household .rsvp-guide {display:none!important;}
 .public-invitation #introMask .intro-guest-name {
@@ -3073,7 +3071,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 <section class="rsvp" id="rsvp">
 <div class="wrap">
 <h2 class="rsvp-one-line">So, are you coming?</h2>
-<p class="rsvp-deadline">Please reply by January 15 2027.</p>
+<p class="rsvp-deadline">Please reply by January 15, 2027.</p>
 <div class="rsvp-box">
 <div class="personal-household">
 <p class="personal-eyebrow">Your invitation</p>
