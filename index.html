@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<meta name="wedding-memory-form" content="2026-11-03-no-name-no-checkbox" />
+<meta name="wedding-memory-form" content="2026-11-03-clean-status-large-files-laptop-alignment" />
 <!-- Messenger / Facebook social link preview; upload wedding-preview.jpg alongside index.html. -->
 <meta property="og:type" content="website" />
 <!-- Deliberately omit og:url: do not canonicalize personalized Messenger shares to the generic homepage. -->
@@ -2820,6 +2820,41 @@ window.addEventListener('DOMContentLoaded',()=>{
 }
 
 </style>
+
+<style id="wedding-desktop-rsvp-and-memory-fixes-20261103">
+/* Show memory feedback ONLY during a real upload, success, or error. */
+#memoryStatus[hidden]{display:none!important;}
+#memoryStatus:not([hidden]){display:block;margin-top:13px;line-height:1.65;}
+/* Single-person invitations already show the guest name in the card heading.
+   Don't strand the Yes/No controls at the far right of a desktop layout. */
+@media(min-width:601px){
+  .personal-household.is-single-guest #rsvpGuests .personal-guest{
+    display:flex!important;flex-direction:column!important;
+    align-items:center!important;justify-content:center!important;
+    max-width:620px;margin:0 auto!important;padding:19px 0 10px!important;
+  }
+  .personal-household.is-single-guest #rsvpGuests .personal-choices{
+    display:flex!important;width:auto!important;justify-content:center!important;
+    gap:14px!important;
+  }
+  .personal-household.is-single-guest #rsvpGuests .personal-choices label{
+    min-width:96px!important;min-height:45px!important;
+  }
+  /* Household rows keep the guest label alongside their choices rather than
+     stretching across the entire invitation card on a large laptop screen. */
+  .personal-household:not(.is-single-guest) #rsvpGuests{
+    max-width:720px;margin-inline:auto;
+  }
+  .personal-household:not(.is-single-guest) #rsvpGuests .personal-guest{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;gap:20px!important;
+  }
+  .personal-household:not(.is-single-guest) #rsvpGuests .personal-choices{
+    display:flex!important;justify-content:flex-end!important;gap:9px!important;
+  }
+  #rsvpSaveButton{margin-top:20px!important;}
+}
+</style>
 </head>
 <body id="top">
 
@@ -3064,7 +3099,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       </div>
       <p class="memory-help memory-upload-permission">By sending a memory, you agree we may consider sharing it at our wedding.</p>
       <button class="memory-submit" id="memorySubmit" type="submit" disabled>Send My Memories</button>
-      <p id="memoryStatus" class="memory-help" role="status" aria-live="polite">Submissions will open once the private upload connection is ready.</p>
+      <p id="memoryStatus" class="memory-help" role="status" aria-live="polite" hidden></p>
     </form>
     <p class="memory-optional">Participation is entirely optional.</p>
   </div>
@@ -3664,10 +3699,9 @@ const dog=document.querySelector('.topdog');
     // Selection controls the button; lack of test mode shows an actionable message on submit.
     submit.disabled = sending || !hasFiles;
     recordClear.hidden=recordedFiles.length===0;
-    if(!sending && !validInvite) status.textContent='Open your personalized invitation link to share a memory.';
-    else if(!sending && !endpoint) status.textContent='Upload testing is not enabled for this link. Add &memoryTest=1 to the personalized invitation URL.';
-    else if(!sending && !hasFiles) status.textContent='Choose a photo, video or recording to begin.';
-    else if(!sending) status.textContent='Ready to send.';
+    // Keep the space below the button clean until there is actual feedback.
+    // Upload progress, success and errors are shown explicitly while sending.
+    if(!sending) { status.textContent=''; status.hidden=true; }
   }
   function toggle(panel,button){
     const show=panel.hidden;
@@ -3710,20 +3744,46 @@ const dog=document.querySelector('.topdog');
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     const files=filesToSend();
-    if(!endpoint){status.textContent=validInvite
+    if(!endpoint){status.hidden=false;status.textContent=validInvite
       ? 'To test uploads, add &memoryTest=1 to the end of your personalized invitation URL (before any #section).'
       : 'Open the personalized invitation link you received to upload a memory.';return;}
     if(sending||!files.length)return;
-    sending=true;submit.disabled=true;
+    sending=true;submit.disabled=true;status.hidden=false;
     let completed=0;
     let errorMessage='';
     try{
       for(const file of files){
+        const maxSize = file.type.startsWith('video/') ? 18*1024*1024 :
+          file.type.startsWith('audio/') ? 12*1024*1024 : 15*1024*1024;
+        if(file.size > maxSize){
+          throw new Error(`${file.name} is too large. This upload currently supports photos up to 15 MB, short videos up to 18 MB, and audio up to 12 MB.`);
+        }
         status.textContent=`Uploading ${completed+1} of ${files.length}…`;
-        const fd=new FormData();
-        fd.append('invitation',String(window.WEDDING_INVITE_CODE||''));
-        fd.append('file',file,file.name);
-        const response=await fetch(endpoint,{method:'POST',body:fd,cache:'no-store'});
+        // Encode on the device rather than in the 128 MB Cloudflare worker.
+        // This permits larger files on the free plan without copying the
+        // entire raw file into Cloudflare's limited JS heap.
+        const base64 = await new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onerror=()=>reject(new Error('Could not read this file. Please try again.'));
+          reader.onload=()=>{
+            const result=String(reader.result||'');
+            const comma=result.indexOf(',');
+            if(comma<0) reject(new Error('Unsupported file content.'));
+            else resolve(result.slice(comma+1));
+          };
+          reader.readAsDataURL(file);
+        });
+        const body=JSON.stringify({
+          invitation:String(window.WEDDING_INVITE_CODE||''),
+          fileName:file.name,
+          mimeType:file.type,
+          size:file.size,
+          base64
+        });
+        const response=await fetch(endpoint,{
+          method:'POST',headers:{'content-type':'application/json'},
+          body,cache:'no-store'
+        });
         const result=await response.json().catch(()=>null);
         if(!response.ok || !result || result.ok !== true) {
           throw new Error(result && typeof result.error==='string' ? result.error : 'Upload failed. Please try again.');
@@ -3738,8 +3798,8 @@ const dog=document.querySelector('.topdog');
     }finally{
       sending=false;
       refresh();
-      if(completed===files.length) status.textContent='Thank you! Your memories have been received. 🤍';
-      else if(errorMessage) status.textContent=errorMessage;
+      if(completed===files.length) {status.hidden=false;status.textContent='Thank you! Your memories have been received. 🤍';}
+      else if(errorMessage) {status.hidden=false;status.textContent=errorMessage;}
     }
   });
   refresh();
