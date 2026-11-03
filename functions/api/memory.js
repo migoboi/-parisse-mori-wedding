@@ -9,7 +9,8 @@
  *   WEDDING_API_SECRET      // already used by functions/api/rsvp.js
  *   WEDDING_APPS_SCRIPT_URL // already used by functions/api/rsvp.js
  *
- * This endpoint requires a valid personalized invitation link and consent.
+ * This endpoint requires a valid personalized invitation link. The sender's
+ * name is taken from the validated invitation (not from a public form field).
  * Do not turn on the public upload UI until the backend is tested.
  */
 const RESPONSE_HEADERS = {
@@ -102,17 +103,9 @@ export async function onRequestPost({ request, env }) {
     return json(400, { ok: false, error: 'Could not read the upload.' });
   }
   const invite = fields.get('invitation');
-  const guestName = fields.get('name');
-  const consent = fields.get('consent');
   const file = fields.get('file');
   if (typeof invite !== 'string' || !/^[a-f\d]{32}$/i.test(invite)) {
     return json(403, { ok: false, error: 'Open your personal invitation link to share a memory.' });
-  }
-  if (typeof guestName !== 'string' || !guestName.trim() || guestName.length > 120) {
-    return json(400, { ok: false, error: 'Please enter your name.' });
-  }
-  if (consent !== 'yes') {
-    return json(400, { ok: false, error: 'Please confirm permission to share the memory.' });
   }
   if (!(file instanceof File)) {
     return json(400, { ok: false, error: 'Please choose a file.' });
@@ -129,19 +122,24 @@ export async function onRequestPost({ request, env }) {
   try {
     // The same private RSVP Google Apps Script confirms the invitation exists.
     // We don't expose the RSVP secret or Google response to the guest.
-    const invitation = await postScript(rsvpUrl, {
+    const lookup = await postScript(rsvpUrl, {
       auth: env.WEDDING_API_SECRET,
       action: 'lookup',
       invite,
     });
-    if (!invitation || invitation.ok !== true || !Array.isArray(invitation.guests) ||
+    // RSVP lookup returns {ok:true, invitation:{invitationName, guests:[...]}}.
+    const invitation = lookup && lookup.invitation;
+    if (!lookup || lookup.ok !== true || !invitation || !Array.isArray(invitation.guests) ||
         invitation.guests.length === 0) {
       return json(403, { ok: false, error: 'This invitation could not be verified.' });
     }
+    const guestName = String(invitation.invitationName ||
+      invitation.guests.map(guest => guest && guest.guestName).filter(Boolean).join(' & ') ||
+      'Invited guest').trim().slice(0, 120);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const result = await postScript(memoryUrl, {
       secret: env.MEMORY_API_SECRET,
-      guestName: guestName.trim(),
+      guestName,
       fileName: String(file.name || 'memory').slice(0, 90),
       mimeType,
       base64: base64FromBytes(bytes),
