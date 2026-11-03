@@ -2375,6 +2375,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 .rsvp-calendar .calendar-eyebrow{margin:0 0 10px!important;font:500 9px/1.5 Montserrat,Arial,sans-serif!important;letter-spacing:.22em;text-transform:uppercase;color:#ebc9a3!important;}
 .rsvp-calendar h4{font:400 clamp(27px,7vw,35px)/1.13 "Cormorant Garamond",Georgia,serif;margin:0 0 10px;color:#fff1df;}
 .rsvp-calendar .calendar-names{margin:0 auto 11px!important;font:400 16px/1.5 "Cormorant Garamond",Georgia,serif!important;color:#f2dbca!important;}
+.rsvp-calendar .calendar-missed{margin:0 auto 12px!important;max-width:370px;color:#e6c7b4!important;font:400 12px/1.6 Inter,Arial,sans-serif!important;}
+.rsvp-calendar .calendar-missed[hidden]{display:none!important;}
 .rsvp-calendar .calendar-copy{margin:0 auto 15px!important;max-width:360px;color:#e7d3c0!important;font-size:12px!important;line-height:1.7!important;}
 .rsvp-calendar .calendar-date{margin:0 auto 18px!important;color:#f0dec9!important;font:500 10px/1.65 Montserrat,Arial,sans-serif!important;letter-spacing:.025em;}
 .rsvp-calendar .calendar-actions{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:9px;}
@@ -3087,7 +3089,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   <p class="calendar-eyebrow" id="rsvpCalendarEyebrow">Your RSVP is confirmed</p>
   <h4 id="rsvpCalendarHeading">See you there!</h4>
   <p id="rsvpCalendarNames" class="calendar-names"></p>
-  <p class="calendar-copy">Can’t wait to celebrate with you!<br/>Save the details to your calendar.</p>
+  <p id="rsvpCalendarMissed" class="calendar-missed" hidden></p>
+  <p id="rsvpCalendarCopy" class="calendar-copy">Can’t wait to celebrate with you!<br/>Save the details to your calendar.</p>
   <p class="calendar-date">SATURDAY, MARCH 06 2027 · CEREMONY 4:30 PM</p>
   <div class="calendar-actions" role="group" aria-label="Choose your calendar">
     <button class="calendar-choice" id="rsvpAppleCalendar" type="button" aria-label="Apple Calendar — add one wedding event">
@@ -3142,6 +3145,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   const calendarCard=document.getElementById('rsvpCalendar');
   const calendarEyebrow=document.getElementById('rsvpCalendarEyebrow');
   const calendarNames=document.getElementById('rsvpCalendarNames');
+  const calendarMissed=document.getElementById('rsvpCalendarMissed');
+  const calendarCopy=document.getElementById('rsvpCalendarCopy');
   const appleCalendar=document.getElementById('rsvpAppleCalendar');
   const googleCalendar=document.getElementById('rsvpGoogleCalendar');
 
@@ -3254,9 +3259,22 @@ window.addEventListener('DOMContentLoaded',()=>{
   function showCalendar(guests,preview){
     const attending=guests.filter(guest=>guest.rsvpStatus==='Attending');
     if(!attending.length){hideCalendar();return;}
+    const declined=guests.filter(guest=>guest.rsvpStatus==='Declined');
     const names=attending.map(guest=>guest.guestName||'Guest');
+    const missedNames=declined.map(guest=>guest.guestName||'Guest');
+    const readableNames=missedNames.length<3
+      ? missedNames.join(' and ')
+      : missedNames.slice(0,-1).join(', ')+', and '+missedNames[missedNames.length-1];
     calendarEyebrow.textContent=preview?'Calendar feature preview — no RSVP saved':'Your RSVP is confirmed';
     calendarNames.textContent=names.join(' & ');
+    // In a partially attending household, acknowledge the guests who cannot come, too.
+    calendarMissed.hidden=!declined.length;
+    calendarMissed.textContent=declined.length
+      ? 'Sorry you can’t make it, '+readableNames+'. We’ll miss you!'
+      : '';
+    calendarCopy.innerHTML=declined.length
+      ? 'Save the details to your calendar.'
+      : 'Can’t wait to celebrate with you!<br/>Save the details to your calendar.';
     calendarCard.hidden=false;
   }
 
