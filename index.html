@@ -2863,21 +2863,92 @@ window.addEventListener('DOMContentLoaded',()=>{
 }
 </style>
 
-<style id="wedding-dachshund-upload-progress-20261103">
-/* Upload progress appears only while a file is being sent or once it is saved. */
+<style id="wedding-minimal-memory-progress-20261103">
+/* A restrained progress rail instead of the decorative upload dachshund. */
 #memoryProgress[hidden]{display:none!important;}
-.memory-progress{margin-top:17px;padding:16px 13px 13px;border:1px solid rgba(201,173,146,.29);border-radius:6px;background:rgba(50,20,23,.27);text-align:center;}
-.memory-progress-label{display:block;font:500 11px/1.65 Montserrat,Arial,sans-serif;color:#ead8c3;letter-spacing:.035em;}
-.memory-progress-dog{display:block;margin:8px auto 2px;width:min(100%,310px);height:auto;overflow:visible;}
-.memory-dog-cream{color:#f6e9df;}
-.memory-dog-brown{color:#bc8053;}
-.memory-progress-rail{height:5px;width:min(100%,304px);margin:0 auto 5px;border-radius:10px;background:rgba(246,233,223,.17);overflow:hidden;position:relative;}
-.memory-progress-bar{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#f6e9df 0%,#bc8053 100%);transition:width .3s ease;}
-.memory-progress[aria-busy="true"] .memory-progress-rail:after{content:"";position:absolute;top:0;bottom:0;width:16%;left:-20%;background:linear-gradient(90deg,transparent,rgba(255,250,244,.32),transparent);animation:memoryRailShimmer 2s linear infinite;}
+.memory-progress{
+  margin-top:15px;padding:15px 16px 13px;
+  border:1px solid rgba(201,173,146,.3);border-radius:6px;
+  background:rgba(50,20,23,.27);text-align:left;
+}
+.memory-progress-label{
+  display:block;margin-bottom:10px;
+  font:500 11px/1.6 Montserrat,Arial,sans-serif;
+  color:#ead8c3;letter-spacing:.03em;
+}
+.memory-progress-rail{
+  height:7px;width:100%;margin:0;border-radius:100px;
+  background:rgba(246,233,223,.19);overflow:hidden;position:relative;
+}
+.memory-progress-bar{
+  height:100%;width:0%;border-radius:100px;
+  background:linear-gradient(90deg,#f1dcc6 0%,#c69875 58%,#a56b49 100%);
+  transition:width .35s ease-out;
+}
+.memory-progress[aria-busy="true"] .memory-progress-rail:after{
+  content:"";position:absolute;top:0;bottom:0;width:16%;left:-20%;
+  background:linear-gradient(90deg,transparent,rgba(255,250,244,.23),transparent);
+  animation:memoryRailShimmer 2.3s linear infinite;
+}
 .memory-progress[aria-busy="false"] .memory-progress-rail:after{display:none;}
 @keyframes memoryRailShimmer{to{left:120%;}}
-@media(prefers-reduced-motion:reduce){.memory-progress-bar{transition:none;}.memory-progress[aria-busy="true"] .memory-progress-rail:after{animation:none;}}
-@media(max-width:600px){.memory-progress{margin-top:15px;padding:13px 10px 12px;}.memory-progress-dog{width:min(100%,270px);}}
+@media(prefers-reduced-motion:reduce){
+  .memory-progress-bar{transition:none;}
+  .memory-progress[aria-busy="true"] .memory-progress-rail:after{animation:none;}
+}
+@media(max-width:600px){.memory-progress{margin-top:14px;padding:13px 12px;}}
+</style>
+<style id="wedding-matched-venue-cards-20261103">
+/* Two architectural illustrations, balanced like one editorial diptych. */
+.details .cards .venue-card .venue-art,
+.details .cards .reception-card .reducto-arch-art{
+  height:clamp(230px,23vw,300px)!important;
+  min-height:0;
+  margin:0 -10px 14px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:transparent!important;
+  overflow:hidden!important;
+}
+.details .cards .venue-card .venue-art img,
+.details .cards .reception-card .reducto-arch-art img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  background:transparent!important;
+}
+.details .cards .venue-card .venue-copy>small{
+  display:block;
+  font:500 10px/1.55 Montserrat,Arial,sans-serif;
+  letter-spacing:.15em;
+  color:#687b6c;
+  text-transform:uppercase;
+}
+.details .cards .venue-card .venue-copy>strong{
+  display:block;
+  margin:7px 0 5px;
+  font:400 clamp(22px,2.6vw,28px)/1.15 "The Seasons","Cormorant Garamond",Georgia,serif;
+  letter-spacing:0;
+  color:#3c151b;
+}
+.details .cards .venue-card .venue-copy>span{
+  display:block;
+  font:400 clamp(12px,1.4vw,14px)/1.6 Inter,Arial,sans-serif;
+  color:#715f57;
+}
+@media(max-width:600px){
+  .details .cards .venue-card .venue-art,
+  .details .cards .reception-card .reducto-arch-art{
+    height:clamp(170px,57vw,235px)!important;
+    margin:0 -10px 12px!important;
+  }
+}
 </style>
 </head>
 <body id="top">
@@ -3107,25 +3178,6 @@ window.addEventListener('DOMContentLoaded',()=>{
       <button class="memory-submit" id="memorySubmit" type="submit" disabled>Send My Memories</button>
       <div id="memoryProgress" class="memory-progress" role="status" aria-live="polite" aria-busy="true" hidden>
         <span class="memory-progress-label" id="memoryProgressLabel">Preparing your memory…</span>
-        <svg class="memory-progress-dog" viewBox="0 0 340 107" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A little dachshund changes from cream to brown while your memory is uploading">
-          <defs>
-            <g id="memoryDachshundShape" fill="currentColor">
-              <!-- Long body, short paws, a wagging tail and floppy ears. -->
-              <path d="M80 40 C66 42 51 32 48 18" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round"/>
-              <rect x="80" y="34" width="175" height="42" rx="21"/>
-              <path d="M103 64 L104 88 Q104 96 114 96 L122 96 Q130 96 130 89 L130 70 Z"/>
-              <path d="M216 65 L216 88 Q216 96 226 96 L235 96 Q243 96 243 89 L244 65 Z"/>
-              <path d="M232 41 Q248 30 262 31 L271 59 Q259 75 242 71 Z"/>
-              <ellipse cx="280" cy="44" rx="30" ry="25"/>
-              <path d="M263 30 C248 36 249 55 258 70 Q271 73 276 58 Q269 48 270 34 Z"/>
-              <ellipse cx="307" cy="51" rx="8" ry="6"/>
-            </g>
-            <clipPath id="memoryDachshundTint"><rect id="memoryDachshundTintRect" x="0" y="0" width="0" height="107"/></clipPath>
-          </defs>
-          <use href="#memoryDachshundShape" class="memory-dog-cream"/>
-          <use href="#memoryDachshundShape" class="memory-dog-brown" clip-path="url(#memoryDachshundTint)"/>
-          <circle cx="289" cy="40" r="2.9" fill="#49291f"/>
-        </svg>
         <div class="memory-progress-rail" aria-hidden="true"><div class="memory-progress-bar" id="memoryProgressBar"></div></div>
       </div>
       <p id="memoryStatus" class="memory-help" role="status" aria-live="polite" hidden></p>
@@ -3703,7 +3755,6 @@ const dog=document.querySelector('.topdog');
   const progressPanel = document.getElementById('memoryProgress');
   const progressLabel = document.getElementById('memoryProgressLabel');
   const progressBar = document.getElementById('memoryProgressBar');
-  const progressDog = document.getElementById('memoryDachshundTintRect');
   const photoList = document.getElementById('memoryPhotoList');
   const audioList = document.getElementById('memoryAudioList');
   const recordStart = document.getElementById('memoryRecordStart');
@@ -3724,7 +3775,6 @@ const dog=document.querySelector('.topdog');
     progressPanel.setAttribute('aria-busy', safe===100?'false':'true');
     progressLabel.textContent=label;
     progressBar.style.width=safe.toFixed(1)+'%';
-    progressDog.setAttribute('width',(340*safe/100).toFixed(1));
   }
   function renderFileNames(files, list){
     list.replaceChildren();
