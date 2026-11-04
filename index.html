@@ -3199,6 +3199,177 @@ h1,h2,h3,h4,
   }
 }
 </style>
+
+<style id="wedding-editorial-rhythm-20261104">
+/* Creative direction: distinct editorial spreads with quiet, deliberate joins.
+   No scroll effects, artificial haze or extra transition containers. */
+:root{
+  --editorial-wine:#430912;
+  --editorial-paper:#e9e6e0;
+  --editorial-rule:rgba(234,202,177,.22);
+}
+
+/* The invitation, portrait and programme share exactly one wine backdrop. */
+main > section{border-top:0!important;}
+main > section.hero,
+main > section.day,
+main > section.faq,
+main > section.memory-archive,
+main > section.rsvp{background:var(--editorial-wine)!important;}
+
+/* Let the image itself dissolve into the adjacent burgundy only at its edges.
+   The centre stays crisp and the small Koi caption remains unobstructed. */
+main > section.wedding-editorial-cover::before{
+  background:
+    linear-gradient(180deg,
+      var(--editorial-wine) 0%,rgba(67,9,18,.62) 4%,
+      rgba(67,9,18,.15) 13%,transparent 24%,
+      transparent 66%,rgba(67,9,18,.15) 82%,
+      rgba(67,9,18,.61) 93%,var(--editorial-wine) 100%),
+    linear-gradient(90deg,
+      rgba(48,14,25,.93) 0%,rgba(48,14,25,.68) 20%,
+      rgba(48,14,25,.29) 46%,rgba(48,14,25,.06) 100%);
+}
+@media(max-width:760px){
+  main > section.wedding-editorial-cover::before{
+    background:
+      linear-gradient(180deg,
+        var(--editorial-wine) 0%,rgba(67,9,18,.50) 5%,
+        rgba(67,9,18,.13) 14%,transparent 26%,
+        transparent 60%,rgba(67,9,18,.14) 78%,
+        rgba(67,9,18,.60) 93%,var(--editorial-wine) 100%);
+  }
+}
+
+/* Paper begins as a crisp new magazine spread, not a pale blurry glow. */
+main > section.details{
+  background:var(--editorial-paper)!important;
+  box-shadow:inset 0 1px 0 rgba(65,25,32,.10);
+  border:0!important;
+}
+/* The end of the paper spread is equally intentional. */
+main > section.faq{
+  border-top:1px solid rgba(244,221,203,.15)!important;
+}
+
+/* Fine rules tie together the reading sections, without boxing them in. */
+.day .timeline article,
+.faq details{border-top-color:var(--editorial-rule)!important;}
+main > section.memory-archive{
+  position:relative;
+  border:0!important;
+  padding-top:clamp(37px,5vw,62px);
+  padding-bottom:clamp(30px,4.5vw,55px);
+}
+main > section.memory-archive::before{
+  content:"";
+  position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:min(calc(100% - 48px),720px);
+  height:1px;
+  background:var(--editorial-rule);
+  pointer-events:none;
+}
+main > section.rsvp{
+  padding-top:clamp(38px,5vw,60px);
+  padding-bottom:clamp(50px,6vw,78px);
+}
+
+/* Section heights and typography don't need their own extra 'pause' when scrolling. */
+main > section.hero{padding-bottom:clamp(43px,6svh,72px)!important;}
+main > section.day{
+  padding-top:clamp(30px,4.5vw,52px);
+  padding-bottom:clamp(32px,4.5vw,52px);
+}
+main > section.faq{
+  padding-top:clamp(44px,5.8vw,70px);
+  padding-bottom:clamp(27px,4vw,45px);
+}
+main > section.memory-archive .memory-lead{
+  margin-block:8px;
+}
+main > section.memory-archive .memory-tease{
+  margin-top:clamp(16px,3vw,25px);
+}
+main > section.memory-archive .memory-choices{margin-top:clamp(22px,3.5vw,30px);}
+main > section.memory-archive .memory-optional{margin-bottom:0;}
+
+/* Paper labels & links should read as wine/ink, not stray dark-green accents.
+   Dress-colour examples and all artwork are intentionally left untouched. */
+.details .eyebrow,
+.details .card small,
+.details .cards .venue-card .venue-copy>small{color:#825760!important;}
+.details .map-link,
+.details .venue-card:is(.ceremony-card,.reception-card) .map-link{
+  color:#622935!important;
+  border-bottom-color:rgba(98,41,53,.34)!important;
+}
+
+footer.site-footer{
+  background:#3e0811;
+  border-top:1px solid rgba(234,202,177,.20)!important;
+}
+
+@media(max-width:600px){
+  main > section.faq{padding-bottom:29px;}
+  main > section.memory-archive{padding-top:36px;padding-bottom:31px;}
+  main > section.rsvp{padding-top:37px;}
+  main > section.memory-archive::before{width:calc(100% - 44px);}
+}
+@media(prefers-reduced-motion:reduce){
+  .wedding-editorial-cover .cover-photo img{transition:none!important;}
+}
+</style>
+<style id="photo-join-final-20261104">
+/* Only the invitation / portrait / Our Day join is refined. */
+@media(max-width:760px){
+  main > section.hero{padding-bottom:clamp(23px,3.3svh,34px)!important;}
+  main > section.wedding-editorial-cover{
+    background:#430912!important;
+  }
+  /* A photographic dissolve, not a colored haze sitting over the portrait. */
+  main > section.wedding-editorial-cover .cover-photo{
+    -webkit-mask-image:linear-gradient(to bottom,
+      transparent 0%,rgba(0,0,0,.60) 5%,#000 13%,
+      #000 83%,rgba(0,0,0,.87) 89%,transparent 100%);
+    mask-image:linear-gradient(to bottom,
+      transparent 0%,rgba(0,0,0,.60) 5%,#000 13%,
+      #000 83%,rgba(0,0,0,.87) 89%,transparent 100%);
+  }
+  main > section.wedding-editorial-cover::before{
+    background:linear-gradient(to top,rgba(52,11,23,.20),transparent 36%)!important;
+  }
+  main > section.wedding-editorial-cover .cover-content{
+    padding-bottom:30px!important;
+  }
+  main > section.day{padding-top:clamp(24px,4vw,34px)!important;}
+}
+</style>
+<style id="photo-clean-cut-20261104">
+/* A straight magazine-style image edge, not a simulated photographic dissolve.
+   Scope exclusively to the couple's portrait; keep the approved crop and Koi caption. */
+main > section.wedding-editorial-cover,
+main > section.wedding-editorial-cover .cover-photo{
+  border:0!important;
+}
+main > section.wedding-editorial-cover .cover-photo{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+main > section.wedding-editorial-cover::before{
+  background:none!important;
+  opacity:0!important;
+}
+/* Keep the photograph full-bleed with clean boundaries above and below. */
+main > section.wedding-editorial-cover .cover-photo img{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+/* The caption remains quiet and readable without a large tinted gradient. */
+main > section.wedding-editorial-cover .cover-story{
+  text-shadow:0 1px 4px rgba(17,8,10,.65);
+}
+</style>
 </head>
 <body id="top">
 
