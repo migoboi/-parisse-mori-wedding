@@ -4750,10 +4750,9 @@ main > section.rsvp .wedding-rsvp-message {margin: 16px auto 0 !important;}
       invitation.guests.forEach(guest=>{
         guest.rsvpStatus=responses.find(r=>r.guestId===guest.guestId).status;
       });
-      const attendanceParts=[];
-      if(result.attending>0) attendanceParts.push(result.attending+' attending');
-      if(result.declined>0) attendanceParts.push(result.declined+' unable to attend');
-      updateMessage(result.attending===0?'Thanks for letting us know. We’ll miss you.':'Thank you! Your RSVP has been saved.'+(attendanceParts.length?' '+attendanceParts.join(', ')+'.':''),'success');
+      // The confirmation card already acknowledges attending guests.
+      // Keep a warm message for all-declined responses, since no calendar card appears.
+      updateMessage(result.attending===0?'Thanks for letting us know. We’ll miss you.':'','success');
       showCalendar(invitation.guests,false);
     }catch(error){
       updateMessage('We could not save your RSVP: '+(error && error.message || 'Please try again.'),'error');
