@@ -3864,6 +3864,294 @@ main > section.rsvp::before{
   main > section.hero{padding-bottom:64px!important;}
 }
 </style>
+<style id="wedding-final-rsvp-editorial-20261105">
+/* 2026-11-05 | Approved editorial review: full-screen invitation cover,
+   quiet FAQ-to-RSVP handoff, and the approved one-/multi-seat RSVP layouts.
+   Pure presentation changes: the existing RSVP service, personalization,
+   save/validation logic, confirmation and calendar features remain intact. */
+
+/* The invitation is its own full viewport. The portrait begins on scroll,
+   not as a narrow strip at the bottom of the opening screen. */
+main > section.hero {
+  box-sizing: border-box;
+  height: 100svh !important;
+  min-height: 100svh !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: clamp(40px,7svh,84px) !important;
+  padding-bottom: clamp(42px,7svh,84px) !important;
+}
+@media (max-height: 690px) {
+  /* Do not crop any copy or buttons on short phones/landscape screens. */
+  main > section.hero {
+    height: auto !important;
+    min-height: 100svh !important;
+    padding-top: 35px !important;
+    padding-bottom: 42px !important;
+  }
+}
+
+/* The FAQ already contains its own rules. A second standalone one at the
+   beginning of RSVP made the transition look empty and disconnected. */
+main > section.rsvp::before {
+  display: none !important;
+  content: none !important;
+}
+main > section.faq {padding-bottom: 41px !important;}
+main > section.rsvp {padding-top: 32px !important;padding-bottom: 50px !important;}
+@media (max-width:600px) {
+  main > section.faq {padding-bottom: 30px !important;}
+  main > section.rsvp {padding-top: 27px !important;padding-bottom: 50px !important;}
+}
+@media (max-width:360px) {
+  main > section.faq {padding-bottom: 26px !important;}
+  main > section.rsvp {padding-top: 25px !important;}
+}
+
+/* A centered, quietly typeset heading and deadline. */
+main > section.rsvp .wrap {width: min(100%, 920px);}
+main > section.rsvp h2.rsvp-one-line,
+main > section.rsvp .rsvp-deadline {text-align:center !important;margin-inline:auto !important;}
+main > section.rsvp h2.rsvp-one-line {
+  max-width: 790px;
+  text-wrap: balance;
+  margin-bottom: 15px !important;
+}
+main > section.rsvp .rsvp-deadline {
+  max-width: 600px;
+  margin-bottom: clamp(30px, 4vw, 43px) !important;
+  color: #ddc5b0 !important;
+}
+
+/* Exactly ONE fine border around the invitation: no double frame. */
+main > section.rsvp .rsvp-box {
+  width: min(100%, 740px);
+  max-width: 740px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+main > section.rsvp .personal-household {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+  padding: clamp(29px,4.8vw,44px) clamp(20px,5vw,48px) clamp(29px,4.8vw,42px) !important;
+  border: 1px solid rgba(230,204,176,.67) !important;
+  border-radius: clamp(19px,3.6vw,28px) !important;
+  background: linear-gradient(155deg, rgba(255,244,220,.018), rgba(31,6,13,.18)) !important;
+  box-shadow: none !important;
+  text-align: center;
+}
+main > section.rsvp .personal-household > .personal-eyebrow {
+  text-align: center !important;
+  display: block;
+  margin: 0 auto 16px !important;
+  color: #e9cfb1 !important;
+  font: 500 clamp(9px,1.6vw,11px)/1.5 Montserrat,Arial,sans-serif !important;
+  letter-spacing: .27em !important;
+  text-transform: uppercase;
+}
+main > section.rsvp .personal-household > h3 {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center !important;
+  font: 400 clamp(31px,5.2vw,55px)/1.12 "Cormorant Garamond",Georgia,serif !important;
+  color: #f5e8d7 !important;
+  margin: 0 auto 18px !important;
+  letter-spacing: -.018em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+main > section.rsvp .personal-household > .intro-seats {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto !important;
+  padding: 11px 15px !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid rgba(230,204,176,.63) !important;
+  background: transparent !important;
+  color: #f1ddc7 !important;
+  white-space: normal;
+  font: 500 10px/1.35 Montserrat,Arial,sans-serif !important;
+  letter-spacing: .11em !important;
+}
+main > section.rsvp .personal-household > .intro-seats .seat-number,
+main > section.rsvp .personal-household > .intro-seats .seat-copy {
+  font: 500 clamp(9px,1.6vw,11px)/1.35 Montserrat,Arial,sans-serif !important;
+  letter-spacing: .12em !important;
+  color: inherit !important;
+}
+
+/* A single fine internal rule separates the reserved names from the answers. */
+#personalRsvp {
+  width: 100%;
+  min-width: 0;
+  padding-top: clamp(21px,3.3vw,32px);
+  margin-top: clamp(24px,3.4vw,33px);
+  border-top: 1px solid rgba(230,204,176,.34);
+}
+#personalRsvp #rsvpGuests {width:100%;max-width:100%;margin:0 auto;}
+#personalRsvp #rsvpGuests .personal-guest {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+  border: 0 !important;
+}
+#personalRsvp #rsvpGuests .personal-guest legend {
+  display: contents !important;
+  float: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#personalRsvp #rsvpGuests .personal-guest .guest-label {
+  display: block;
+  font: 400 clamp(23px,3.3vw,31px)/1.15 "Cormorant Garamond",Georgia,serif !important;
+  color: #f4e5d5 !important;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+#personalRsvp #rsvpGuests .personal-choices {
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: clamp(8px,2vw,15px) !important;
+  width: 100% !important;
+  align-items: center;
+}
+#personalRsvp #rsvpGuests .personal-choices label {
+  box-sizing:border-box;
+  width:100% !important;
+  min-width:0;
+  min-height:44px !important;
+  margin:0 !important;
+  padding:9px 6px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(234,209,179,.64) !important;
+  background:transparent;
+  color:#f5e8d7;
+  font:500 clamp(10px,1.7vw,11px)/1.4 Montserrat,Arial,sans-serif !important;
+  letter-spacing:.07em !important;
+  text-transform:uppercase;
+  text-align:center;
+  cursor:pointer;
+}
+#personalRsvp #rsvpGuests .personal-choices label:has(input:checked),
+#personalRsvp #rsvpGuests .personal-choices label.is-selected {
+  background:#ecd8c1 !important;
+  border-color:#ecd8c1 !important;
+  color:#42121b !important;
+}
+
+/* Single seat: the name is already centered above, so the answer buttons
+   form a quiet centered pair without an unnecessary repeated name. */
+main > section.rsvp .personal-household.is-single-guest #rsvpGuests .personal-guest {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+main > section.rsvp .personal-household.is-single-guest #personalRsvp #rsvpGuests .personal-guest legend {
+  /* Stronger than the shared fieldset reset: single guests are named above. */
+  display: none !important;
+}
+main > section.rsvp .personal-household.is-single-guest #rsvpGuests .personal-choices {
+  width: min(100%,430px) !important;
+  margin: 0 auto !important;
+}
+
+/* Multiple seats: guest name on the left, equal Yes/No controls on the
+   right. Names and buttons stay aligned even on compact iPhones. */
+main > section.rsvp .personal-household:not(.is-single-guest) #rsvpGuests .personal-guest {
+  display: grid !important;
+  grid-template-columns: minmax(0,.9fr) minmax(0,1.75fr) !important;
+  gap: clamp(11px,2.5vw,20px) !important;
+  align-items: center !important;
+  padding: clamp(11px,1.8vw,17px) 0 !important;
+}
+main > section.rsvp .personal-household:not(.is-single-guest) #rsvpGuests .personal-choices {
+  justify-content: stretch !important;
+}
+
+/* RSVP action: deliberate and compact, not a heavy full-width form button. */
+#rsvpSaveButton.personal-demo-action {
+  display: block !important;
+  box-sizing: border-box;
+  width: min(100%,310px) !important;
+  max-width: 310px !important;
+  min-height: 49px !important;
+  margin: clamp(24px,3.5vw,33px) auto 0 !important;
+  padding: 13px 21px !important;
+  border: 1px solid #eed8bf !important;
+  border-radius: 999px !important;
+  background: #ead6bc !important;
+  color: #42131c !important;
+  font: 500 clamp(11px,1.9vw,13px)/1.35 Montserrat,Arial,sans-serif !important;
+  letter-spacing:.07em !important;
+  text-align: center !important;
+}
+#rsvpSaveButton.personal-demo-action:disabled {opacity:.55 !important;}
+#rsvpMessage:empty {display:none !important;}
+main > section.rsvp .wedding-rsvp-message {margin: 16px auto 0 !important;}
+
+@media (max-width:600px) {
+  main > section.rsvp .rsvp-box {width:100% !important;}
+  main > section.rsvp .personal-household {
+    padding: 29px clamp(17px,4.4vw,25px) 31px !important;
+    border-radius: 20px !important;
+  }
+  main > section.rsvp .personal-household > .personal-eyebrow {
+    margin-bottom: 13px !important;
+    font-size: 9px !important;
+    letter-spacing: .23em !important;
+  }
+  main > section.rsvp .personal-household > h3 {
+    font-size: clamp(29px,8.1vw,40px) !important;
+    margin-bottom: 16px !important;
+  }
+  main > section.rsvp .personal-household > .intro-seats {
+    padding: 10px 12px !important;
+  }
+  #personalRsvp {margin-top:25px;padding-top:25px;}
+  #personalRsvp #rsvpGuests .personal-guest .guest-label {
+    font-size: clamp(22px,5.7vw,27px) !important;
+  }
+  #personalRsvp #rsvpGuests .personal-choices label {
+    min-height:43px !important;
+    padding:8px 4px !important;
+  }
+  main > section.rsvp .personal-household:not(.is-single-guest) #rsvpGuests .personal-guest {
+    grid-template-columns:minmax(0,.9fr) minmax(0,1.75fr) !important;
+    gap:10px !important;
+    padding:12px 0 !important;
+  }
+  #rsvpSaveButton.personal-demo-action {
+    width:min(100%,265px) !important;
+    max-width:265px !important;
+    margin-top:25px !important;
+  }
+}
+@media (max-width:360px){
+  main > section.rsvp .personal-household {padding-inline:15px !important;}
+  main > section.rsvp .personal-household > h3 {font-size:clamp(27px,8.2vw,32px) !important;}
+  #personalRsvp #rsvpGuests .personal-guest .guest-label {font-size:21px !important;}
+  main > section.rsvp .personal-household:not(.is-single-guest) #rsvpGuests .personal-guest {
+    gap:8px !important;
+  }
+  #personalRsvp #rsvpGuests .personal-choices {gap:6px !important;}
+}
+
+</style>
 </head>
 <body id="top">
 
@@ -3978,11 +4266,9 @@ main > section.rsvp::before{
 <p class="eyebrow">Our Day · March 06 2027</p>
 <h2>From Escolta<br/>to Intramuros</h2>
 <div class="timeline">
-<article><time>4:00 PM</time><div><b>Guest arrival</b><p>First United Building · Escolta</p></div></article>
-<article><time>4:30 PM</time><div><b>Ceremony</b><p>FUB Dome · until 5:30 PM</p></div></article>
-
-<article><time>7:00 PM</time><div><b>Dinner</b><p>Reducto de San Pedro · reception</p></div></article>
-<article><time>8:00 PM</time><div><b>After party</b><p>Drinks, music and dancing · until midnight</p></div></article>
+<article><time>4:30 PM</time><div><b>The Ceremony</b><p>First United Building Dome · Escolta</p></div></article>
+<article><time>7:00 PM</time><div><b>The Reception</b><p>Reducto de San Pedro · Intramuros</p></div></article>
+<article><time>8:00 PM</time><div><b>The After Party</b><p>Drinks, music &amp; dancing until midnight</p></div></article>
 </div>
 </div>
 </section>
