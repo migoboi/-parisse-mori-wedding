@@ -3686,6 +3686,34 @@ main > section.rsvp::before{
 }
 </style>
 
+
+<style id="wedding-faq-type-refinement-20261105">
+/* More restrained editorial scale for the quick guide and RSVP invitation.
+   Do not change any copy, spacing logic, decorations or form controls. */
+main > section.faq .eyebrow {
+  font-size:8.5px;
+  letter-spacing:.22em;
+}
+main > section.faq h2 {
+  font-size:clamp(30px,4.7vw,43px);
+  line-height:1.04;
+}
+main > section.faq details summary {
+  font-size:19px;
+  line-height:1.22;
+}
+main > section.rsvp h2.rsvp-one-line {
+  font-size:clamp(29px,4.7vw,43px)!important;
+  line-height:1.1!important;
+}
+@media (max-width:600px) {
+  main > section.faq h2 {font-size:clamp(30px,7.6vw,35px);}
+  main > section.faq details summary {font-size:19px;}
+  main > section.rsvp h2.rsvp-one-line {
+    font-size:clamp(28px,7.1vw,33px)!important;
+  }
+}
+</style>
 </head>
 <body id="top">
 
@@ -3888,7 +3916,7 @@ main > section.rsvp::before{
 
 <section class="rsvp" id="rsvp">
 <div class="wrap">
-<h2 class="rsvp-one-line">So, are you coming?</h2>
+<h2 class="rsvp-one-line">Shall we see you there?</h2>
 <p class="rsvp-deadline">Please reply by January 15, 2027.</p>
 <div class="rsvp-box">
 <div class="personal-household">
